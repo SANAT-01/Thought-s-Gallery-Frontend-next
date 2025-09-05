@@ -1,26 +1,50 @@
 @import "tailwindcss";
 
+/* ======================
+   Custom Theme Variables
+   ====================== */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0a0a0a;  /* deep black */
+  --foreground: #ededed;  /* light gray text */
+  --accent: #a855f7;      /* violet accent */
+  --accent-hover: #9333ea; /* darker violet hover */
+  --card: rgba(17, 17, 17, 0.8); /* glassy widget background */
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-brand-violet: var(--accent);
+  --color-brand-violet-dark: var(--accent-hover);
+  --color-brand-card: var(--card);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
+/* ======================
+   Light Mode (optional)
+   ====================== */
+@media (prefers-color-scheme: light) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #ffffff;
+    --foreground: #171717;
+    --card: rgba(255, 255, 255, 0.8);
   }
 }
 
+/* ======================
+   Base Styles
+   ====================== */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Transparent / glass utility */
+.glass {
+  background: var(--card);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }

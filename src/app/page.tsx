@@ -1,103 +1,180 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+import { useEffect, useState } from "react";
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
+type Thought = {
+  id: string;
+  content: string;
+  likes: number;
+  dislikes: number;
+  user_id: string;
+  created_at: string;
+};
+
+export default function HomePage() {
+  const [thoughts, setThoughts] = useState<Thought[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [newThought, setNewThought] = useState("");
+  const [posting, setPosting] = useState(false);
+
+  // Fetch all thoughts
+  useEffect(() => {
+    const fetchThoughts = async () => {
+      const token = localStorage.getItem("authToken");
+      try {
+        const res = await fetch("http://localhost:5173/api/thoughts", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (data.success) {
+          setThoughts(data.data);
+        }
+      } catch (err) {
+        console.error("Failed to load thoughts", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchThoughts();
+  }, []);
+
+  // Like / Dislike
+  const handleReaction = async (id: string, type: "like" | "dislike") => {
+    const token = localStorage.getItem("authToken");
+    try {
+      const res = await fetch(
+        `http://localhost:5173/api/thoughts/${id}/${type}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const data = await res.json();
+      if (data.success) {
+        setThoughts((prev) =>
+          prev.map((t) =>
+            t.id === id
+              ? {
+                  ...t,
+                  likes: type === "like" ? t.likes + 1 : t.likes,
+                  dislikes: type === "dislike" ? t.dislikes + 1 : t.dislikes,
+                }
+              : t
+          )
+        );
+      }
+    } catch (err) {
+      console.error("Error reacting:", err);
+    }
+  };
+
+  // Post a new thought
+  const handlePost = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!newThought.trim()) return;
+
+  setPosting(true);
+  const token = localStorage.getItem("authToken");
+  const user_id = localStorage.getItem("user_id"); // ✅ get user id
+
+  try {
+    const res = await fetch("http://localhost:5173/api/thought", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        user_id,          // ✅ required by API
+        content: newThought,
+      }),
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      setThoughts([data.data, ...thoughts]); // prepend
+      setNewThought("");
+    }
+  } catch (err) {
+    console.error("Error posting thought:", err);
+  } finally {
+    setPosting(false);
+  }
+  };
+
+  if (loading) {
+    return (
+      <main className="flex min-h-screen items-center justify-center text-gray-400">
+        Loading thoughts...
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+    );
+  }
+
+  return (
+    <main className="min-h-screen bg-background text-foreground p-6">
+      <h1 className="text-3xl font-bold text-center text-brand-violet mb-8">
+        🌌 Thought’s Gallery 💭
+      </h1>
+
+      {/* Post Thought Form */}
+      <form
+        onSubmit={handlePost}
+        className="glass max-w-xl mx-auto mb-8 p-4 rounded-xl shadow-lg border border-brand-violet/30"
+      >
+        <textarea
+          placeholder="✨ Share your thought..."
+          value={newThought}
+          onChange={(e) => setNewThought(e.target.value)}
+          className="w-full bg-transparent border border-white/10 rounded-lg p-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-violet"
+          rows={3}
+        />
+        <button
+          type="submit"
+          disabled={posting}
+          className="mt-3 w-full bg-brand-violet hover:bg-brand-violet-dark text-white font-semibold py-2 rounded-lg transition disabled:opacity-50"
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+          {posting ? "Posting..." : "Post Thought"}
+        </button>
+      </form>
+
+      {/* Thoughts Feed */}
+      <div className="max-w-2xl mx-auto space-y-6">
+        {thoughts.map((thought) => (
+          <div
+            key={thought.id}
+            className="glass p-6 rounded-xl shadow-md border border-white/10 hover:border-brand-violet/40 transition"
+          >
+            <p className="text-lg font-medium">{thought.content}</p>
+            <div className="flex items-center justify-between mt-4 text-sm text-gray-400">
+              <span>by User {thought.user_id.slice(0, 6)}...</span>
+              <span>
+                {new Date(thought.created_at).toLocaleDateString()} •{" "}
+                {new Date(thought.created_at).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </span>
+            </div>
+            <div className="flex items-center gap-4 mt-4">
+              <button
+                onClick={() => handleReaction(thought.id, "like")}
+                className="px-3 py-1 bg-gradient-to-r from-brand-violet to-brand-violet-dark text-white rounded-md text-sm hover:scale-105 transition"
+              >
+                👍 {thought.likes}
+              </button>
+              <button
+                onClick={() => handleReaction(thought.id, "dislike")}
+                className="px-3 py-1 bg-gradient-to-r from-red-500 to-red-700 text-white rounded-md text-sm hover:scale-105 transition"
+              >
+                👎 {thought.dislikes}
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </main>
   );
 }
