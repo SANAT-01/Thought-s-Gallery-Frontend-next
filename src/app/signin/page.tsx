@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export default function SigninPage() {
-  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,7 +20,7 @@ export default function SigninPage() {
       const res = await fetch("http://localhost:5173/signin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, password }),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
@@ -51,14 +50,6 @@ export default function SigninPage() {
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="w-full px-4 py-2 bg-black/40 border border-white/10 rounded-lg focus:ring-2 focus:ring-brand-violet text-white placeholder-gray-500"
-            required
-          />
           <input
             type="email"
             placeholder="Email"

@@ -1,5 +1,7 @@
 "use client";
 
+import { Signout } from "@/util/helper";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 type Thought = {
@@ -16,6 +18,15 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [newThought, setNewThought] = useState("");
   const [posting, setPosting] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      router.push("/signin"); // redirect if not logged in
+      return;
+    }
+  }, [router]);
 
   // Fetch all thoughts
   useEffect(() => {
@@ -28,9 +39,15 @@ export default function HomePage() {
         const data = await res.json();
         if (data.success) {
           setThoughts(data.data);
+        } else {
+          console.log("first");
+          Signout();
+          router.push("/signin");
         }
       } catch (err) {
         console.error("Failed to load thoughts", err);
+        Signout();
+        router.push("/signin");
       } finally {
         setLoading(false);
       }
