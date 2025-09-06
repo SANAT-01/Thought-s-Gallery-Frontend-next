@@ -40,7 +40,7 @@ export default function SettingsPage() {
 
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:5173/api/user/${user.id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/${user.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -75,7 +75,7 @@ export default function SettingsPage() {
 
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:5173/api/user/${user.id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/${user.id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("authToken")}`,

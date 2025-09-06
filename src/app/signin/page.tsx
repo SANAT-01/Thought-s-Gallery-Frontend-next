@@ -17,7 +17,8 @@ export default function SigninPage() {
     setMessage("");
 
     try {
-      const res = await fetch("http://localhost:5173/signin", {
+      console.log(process.env.NEXT_PUBLIC_API_BASE_URL)
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/signin`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

@@ -25,7 +25,7 @@ export default function ProfilePage() {
 
     // fetch user thoughts (replace with your API)
     if (id) {
-      fetch(`http://localhost:5173/api/thoughts?user_id=${id}`,{
+      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/thoughts?user_id=${id}`,{
         headers: { Authorization: `Bearer ${token}`},
       })
         .then((res) => res.json())

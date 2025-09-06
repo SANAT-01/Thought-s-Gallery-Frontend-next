@@ -33,7 +33,7 @@ export default function HomePage() {
     const fetchThoughts = async () => {
       const token = localStorage.getItem("authToken");
       try {
-        const res = await fetch("http://localhost:5173/api/thoughts", {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/thoughts`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -60,7 +60,7 @@ export default function HomePage() {
     const token = localStorage.getItem("authToken");
     try {
       const res = await fetch(
-        `http://localhost:5173/api/thoughts/${id}/${type}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/thoughts/${id}/${type}`,
         {
           method: "POST",
           headers: {
@@ -98,7 +98,7 @@ export default function HomePage() {
   const user_id = localStorage.getItem("user_id"); // ✅ get user id
 
   try {
-    const res = await fetch("http://localhost:5173/api/thought", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/thought`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
