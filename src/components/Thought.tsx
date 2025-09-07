@@ -36,11 +36,19 @@ const Thought: React.FC<ThoughtProps> = ({ thought, handleReaction }) => {
             <div className="mt-5 border-t border-white/10 pt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs sm:text-sm text-gray-400">
                 <span
                     className="font-mono cursor-pointer hover:text-brand-violet transition"
-                    onClick={() => router.push(`/user/${thought.user_id}`)}
+                    onClick={() =>
+                        router.push(
+                            thought.user_id === localStorage.getItem("user_id")
+                                ? `/profile`
+                                : `/user/${thought.user_id}`
+                        )
+                    }
                 >
                     {"by "}
                     <span className="text-brand-violet">
-                        {thought.username}
+                        {thought.user_id === localStorage.getItem("user_id")
+                            ? "You"
+                            : thought.username}
                     </span>
                 </span>
                 <span>
