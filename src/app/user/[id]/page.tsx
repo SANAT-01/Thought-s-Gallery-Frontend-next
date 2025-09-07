@@ -118,9 +118,6 @@ export default function ProfilePage() {
                                             minute: "2-digit",
                                         })}
                                     </span>
-                                    <span>
-                                        👍 {t.likes} | 👎 {t.dislikes}
-                                    </span>
                                 </div>
                             </div>
                         ))}
