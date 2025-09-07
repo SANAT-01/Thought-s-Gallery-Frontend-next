@@ -27,12 +27,12 @@ export default function SignupPage() {
       const data = await res.json();
       if (data.success) {
         localStorage.setItem("authToken", data.data.authToken);
-        localStorage.setItem("user_id", data.data.user.id); // ✅ store user_id
+        localStorage.setItem("user_id", data.data.user.id);
         localStorage.setItem("username", data.data.user.username);
         localStorage.setItem("email", data.data.user.email);
+
         setMessage("✅ User created successfully!");
-        // optional: redirect to dashboard
-        router.push("/"); // redirect to home
+        router.push("/");
       } else {
         setMessage("❌ " + (data.message || "Signup failed"));
       }
@@ -44,9 +44,9 @@ export default function SignupPage() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background">
-      <div className="glass w-full max-w-md rounded-xl p-8 shadow-lg">
-        <h1 className="text-2xl font-bold text-brand-violet text-center mb-6">
+    <main className="flex items-center justify-center bg-background px-4 h-screen">
+      <div className="glass w-full max-w-md rounded-xl p-6 sm:p-8 shadow-lg">
+        <h1 className="text-2xl sm:text-3xl font-bold text-brand-violet text-center mb-6">
           Create Account
         </h1>
 
@@ -56,7 +56,7 @@ export default function SignupPage() {
             placeholder="Username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full px-4 py-2 bg-black/40 border border-white/10 rounded-lg focus:ring-2 focus:ring-brand-violet text-white placeholder-gray-500"
+            className="w-full px-4 py-2 sm:py-3 bg-black/40 border border-white/10 rounded-lg focus:ring-2 focus:ring-brand-violet text-white placeholder-gray-500 text-sm sm:text-base"
             required
           />
           <input
@@ -64,7 +64,7 @@ export default function SignupPage() {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-2 bg-black/40 border border-white/10 rounded-lg focus:ring-2 focus:ring-brand-violet text-white placeholder-gray-500"
+            className="w-full px-4 py-2 sm:py-3 bg-black/40 border border-white/10 rounded-lg focus:ring-2 focus:ring-brand-violet text-white placeholder-gray-500 text-sm sm:text-base"
             required
           />
           <input
@@ -72,13 +72,13 @@ export default function SignupPage() {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2 bg-black/40 border border-white/10 rounded-lg focus:ring-2 focus:ring-brand-violet text-white placeholder-gray-500"
+            className="w-full px-4 py-2 sm:py-3 bg-black/40 border border-white/10 rounded-lg focus:ring-2 focus:ring-brand-violet text-white placeholder-gray-500 text-sm sm:text-base"
             required
           />
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-brand-violet hover:bg-brand-violet-dark text-white py-2 rounded-lg transition disabled:opacity-50"
+            className="glass w-full bg-brand-violet hover:bg-brand-violet-dark text-white py-2 sm:py-3 rounded-lg transition disabled:opacity-50 text-sm sm:text-base font-medium"
           >
             {loading ? "Signing up..." : "Sign Up"}
           </button>
@@ -88,9 +88,12 @@ export default function SignupPage() {
           <p className="mt-4 text-center text-sm text-gray-300">{message}</p>
         )}
 
-        <p className="text-center text-gray-400 mt-6 text-sm">
+        <p className="text-center text-gray-400 mt-6 text-xs sm:text-sm">
           Already have an account?{" "}
-          <Link href="/signin" className="text-brand-violet hover:text-brand-violet-dark">
+          <Link
+            href="/signin"
+            className="text-brand-violet hover:text-brand-violet-dark"
+          >
             Sign in here
           </Link>
         </p>

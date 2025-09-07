@@ -14,11 +14,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-background text-foreground">
+      <body className="bg-background text-foreground min-h-screen flex flex-col">
+        {/* ✅ Navbar always fixed at top */}
         <header className="fixed inset-x-0 top-0 z-50">
-          <Navbar /> {/* ✅ client-side navbar */}
+          <Navbar />
         </header>
-        <main className="pt-16">{children}</main>
+
+        {/* ✅ main content below navbar, scrollable if needed */}
+        <main className="flex-1 pt-16 overflow-y-hidden">
+          {children}
+        </main>
       </body>
     </html>
   );

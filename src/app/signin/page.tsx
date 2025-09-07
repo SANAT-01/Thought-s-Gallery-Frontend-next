@@ -17,7 +17,6 @@ export default function SigninPage() {
     setMessage("");
 
     try {
-      console.log(process.env.NEXT_PUBLIC_API_BASE_URL)
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/signin`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -27,11 +26,11 @@ export default function SigninPage() {
       const data = await res.json();
       if (data.success) {
         localStorage.setItem("authToken", data.data.authToken);
-        localStorage.setItem("user_id", data.data.user.id); // ✅ store user_id
+        localStorage.setItem("user_id", data.data.user.id);
         localStorage.setItem("username", data.data.user.username);
-        localStorage.setItem("email", data.data.user.email);    
+        localStorage.setItem("email", data.data.user.email);
+
         setMessage("✅ Signed in successfully!");
-        // optional: redirect to dashboard
         router.push("/"); // redirect to home
       } else {
         setMessage("❌ " + (data.message || "Signin failed"));
@@ -44,9 +43,10 @@ export default function SigninPage() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background">
-      <div className="glass w-full max-w-md rounded-xl p-8 shadow-lg">
-        <h1 className="text-2xl font-bold text-brand-violet text-center mb-6">
+    <main className="flex items-center justify-center bg-background px-4 h-screen">
+      {/* 🔹 Glass Card */}
+      <div className="glass w-full max-w-md rounded-xl p-6 sm:p-8 shadow-xl border border-white/10">
+        <h1 className="text-2xl sm:text-3xl font-bold text-brand-violet text-center mb-6">
           Sign In
         </h1>
 
@@ -56,7 +56,7 @@ export default function SigninPage() {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-2 bg-black/40 border border-white/10 rounded-lg focus:ring-2 focus:ring-brand-violet text-white placeholder-gray-500"
+            className="w-full px-4 py-2 bg-black/40 border border-white/10 rounded-lg focus:ring-2 focus:ring-brand-violet text-white placeholder-gray-500 text-sm sm:text-base"
             required
           />
           <input
@@ -64,9 +64,11 @@ export default function SigninPage() {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2 bg-black/40 border border-white/10 rounded-lg focus:ring-2 focus:ring-brand-violet text-white placeholder-gray-500"
+            className="w-full px-4 py-2 bg-black/40 border border-white/10 rounded-lg focus:ring-2 focus:ring-brand-violet text-white placeholder-gray-500 text-sm sm:text-base"
             required
           />
+
+          {/* 🔹 Glass Button */}
           <button
             type="submit"
             disabled={loading}

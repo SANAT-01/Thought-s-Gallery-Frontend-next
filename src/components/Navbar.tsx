@@ -94,7 +94,7 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <Link
+              {/* <Link
                 href="/signup"
                 className="px-4 py-2 rounded-lg bg-[#171717] text-white border border-white/10 hover:bg-black transition"
               >
@@ -105,7 +105,7 @@ export default function Navbar() {
                 className="px-4 py-2 rounded-lg bg-[#171717] text-white border border-white/10 hover:bg-black transition"
               >
                 Sign In
-              </Link>
+              </Link> */}
             </>
           )}
         </nav>
