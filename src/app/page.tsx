@@ -12,6 +12,8 @@ type Thought = {
     dislikes: number;
     user_id: string;
     created_at: string;
+    username: string;
+    profile_picture?: string;
 };
 
 export default function HomePage() {
