@@ -33,6 +33,12 @@ export default function SigninPage() {
                 localStorage.setItem("user_id", data.data.user.id);
                 localStorage.setItem("username", data.data.user.username);
                 localStorage.setItem("email", data.data.user.email);
+                if (data.data.user.profile_picture) {
+                    localStorage.setItem(
+                        "profileImageUrl",
+                        data.data.user.profile_picture
+                    );
+                }
 
                 setMessage("✅ Signed in successfully!");
                 router.push("/"); // redirect to home

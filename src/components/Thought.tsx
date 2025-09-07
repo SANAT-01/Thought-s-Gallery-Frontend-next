@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React from "react";
 
@@ -44,12 +45,26 @@ const Thought: React.FC<ThoughtProps> = ({ thought, handleReaction }) => {
                         )
                     }
                 >
-                    {"by "}
-                    <span className="text-brand-violet">
-                        {thought.user_id === localStorage.getItem("user_id")
-                            ? "You"
-                            : thought.username}
-                    </span>
+                    <div className="flex items-center gap-2">
+                        {thought.profile_picture ? (
+                            <Image
+                                width={28}
+                                height={28}
+                                src={thought.profile_picture}
+                                alt={thought.username}
+                                className="w-7 h-7 rounded-full object-cover"
+                            />
+                        ) : (
+                            <div className="w-7 h-7 rounded-full bg-brand-violet flex items-center justify-center text-2xl font-bold text-white">
+                                {thought.username.charAt(0).toUpperCase()}
+                            </div>
+                        )}
+                        <span className="text-brand-violet">
+                            {thought.user_id === localStorage.getItem("user_id")
+                                ? "You"
+                                : thought.username}
+                        </span>
+                    </div>
                 </span>
                 <span>
                     {new Date(thought.created_at).toLocaleDateString()} •{" "}
