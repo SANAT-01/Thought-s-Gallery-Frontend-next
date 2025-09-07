@@ -5,6 +5,7 @@ const Signout = () => {
     localStorage.removeItem("username");
     localStorage.removeItem("email");
     localStorage.removeItem("user_id");
+    localStorage.removeItem("profileImageUrl");
 };
 
 export { Signout };

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Toast from "./Toast";
+import { Signout } from "@/util/helper";
 
 export default function Navbar() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -28,10 +29,7 @@ export default function Navbar() {
     }, [router, pathname]);
 
     const handleLogout = () => {
-        localStorage.removeItem("authToken");
-        localStorage.removeItem("user_id");
-        localStorage.removeItem("username");
-        localStorage.removeItem("email");
+        Signout();
         setIsLoggedIn(false);
         router.push("/signin");
     };

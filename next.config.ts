@@ -9,6 +9,12 @@ const nextConfig: NextConfig = {
                 port: "5173",
                 pathname: "/uploads/**", // Allows any image from the 'uploads' folder
             },
+            {
+                protocol: "https",
+                hostname: "oa4u5iyuv2himekd.public.blob.vercel-storage.com",
+                // port: "443",
+                pathname: "/profile-images/**", // Allows any image from the 'profile-images' folder
+            },
         ],
     },
 };

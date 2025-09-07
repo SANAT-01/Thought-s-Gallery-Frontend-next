@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function ProfilePage() {
     const [user, setUser] = useState<{
@@ -95,9 +96,24 @@ export default function ProfilePage() {
             <div className="space-y-6">
                 {/* Profile Card */}
                 <div className="p-6 rounded-xl bg-black/50 border border-white/10 shadow-md text-center">
-                    <div className="w-20 h-20 mx-auto rounded-full bg-brand-violet flex items-center justify-center text-2xl font-bold text-white">
-                        {user.username.charAt(0).toUpperCase()}
-                    </div>
+                    {localStorage.getItem("profileImageUrl") ? (
+                        <div className="w-20 h-20 mx-auto rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                            <Image
+                                height={80}
+                                width={80}
+                                src={
+                                    localStorage.getItem("profileImageUrl") ??
+                                    ""
+                                }
+                                alt="Profile Preview"
+                                className="w-full h-full object-cover"
+                            />
+                        </div>
+                    ) : (
+                        <div className="w-20 h-20 mx-auto rounded-full bg-brand-violet flex items-center justify-center text-2xl font-bold text-white">
+                            {user.username.charAt(0).toUpperCase()}
+                        </div>
+                    )}
                     <h2 className="mt-3 text-lg font-bold text-white">
                         {user.username}
                     </h2>
