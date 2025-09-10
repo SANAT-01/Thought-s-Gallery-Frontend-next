@@ -2,8 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
+import { HandThumbDownIcon, HandThumbUpIcon } from "@heroicons/react/24/solid";
 
 // Updated Thought interface to include the current user's action
+
 interface Thought {
     id: string;
     content: string;
@@ -16,13 +19,18 @@ interface Thought {
     user_action: "liked" | "disliked" | null; // e.g., 'liked', 'disliked', or null
 }
 
+interface User {
+    id: string;
+    username: string;
+    profile_picture?: string;
+}
+
 interface Comment {
     id: string;
     user_id: string;
     content: string;
     created_at: string;
-    username: string;
-    profile_picture?: string;
+    user: User;
 }
 
 export default function ThoughtDetailPage() {
@@ -225,57 +233,80 @@ export default function ThoughtDetailPage() {
     return (
         <div className="max-w-2xl mx-auto py-10 px-4">
             {/* Thought Card */}
-            <div className="glass p-6 rounded-2xl shadow-lg mb-8">
-                <h1 className="text-xl font-bold text-white mb-4">
-                    {thought.content}
-                </h1>
-                <div className="flex justify-between text-sm text-gray-400">
-                    <span
-                        className="hover:text-brand-violet cursor-pointer"
-                        onClick={() =>
-                            router.push(
-                                thought.user_id ===
-                                    localStorage.getItem("user_id")
-                                    ? `/profile`
-                                    : `/user/${thought.user_id}`
-                            )
-                        }
-                    >
-                        {thought.user_id === localStorage.getItem("user_id")
-                            ? "You"
-                            : thought.username}
-                    </span>
-                    <span>
-                        {new Date(thought.created_at).toLocaleDateString()} •{" "}
-                        {new Date(thought.created_at).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                        })}
-                    </span>
+            <div className="glass flex p-6 rounded-2xl shadow-lg mb-8">
+                <div className="mr-4">
+                    {thought.profile_picture ? (
+                        <Image
+                            width={56}
+                            height={56}
+                            src={thought.profile_picture ?? ""}
+                            alt={thought.username}
+                            className="w-14 h-14 rounded-full object-cover"
+                        />
+                    ) : (
+                        <div className="w-12 h-12 rounded-full bg-brand-violet flex items-center justify-center text-2xl font-bold text-white">
+                            {thought.username.charAt(0).toUpperCase()}
+                        </div>
+                    )}
                 </div>
-                <div className="flex gap-4 mt-4">
-                    <button
-                        onClick={() => handleInteraction("like")}
-                        disabled={isSubmitting}
-                        className={`glass px-3 py-1 rounded-lg text-sm transition-colors duration-200 disabled:opacity-50 ${
-                            isLiked
-                                ? "bg-red-600 text-red-600"
-                                : "hover:bg-brand-violet/30 text-white"
-                        }`}
-                    >
-                        👍 {thought.likes}
-                    </button>
-                    <button
-                        onClick={() => handleInteraction("dislike")}
-                        disabled={isSubmitting}
-                        className={`glass px-3 py-1 rounded-lg text-sm transition-colors duration-200 disabled:opacity-50 ${
-                            isDisliked
-                                ? "bg-red-600 text-red-600"
-                                : "hover:bg-red-600/30 text-white"
-                        }`}
-                    >
-                        👎 {thought.dislikes}
-                    </button>
+                <div className="w-full">
+                    <h1 className="text-xl font-bold text-white mb-4">
+                        {thought.content}
+                    </h1>
+                    <div className="flex justify-between text-sm text-gray-400">
+                        <span
+                            className="hover:text-brand-violet cursor-pointer"
+                            onClick={() =>
+                                router.push(
+                                    thought.user_id ===
+                                        localStorage.getItem("user_id")
+                                        ? `/profile`
+                                        : `/user/${thought.user_id}`
+                                )
+                            }
+                        >
+                            {thought.user_id === localStorage.getItem("user_id")
+                                ? "You"
+                                : thought.username}
+                        </span>
+                        <span>
+                            {new Date(thought.created_at).toLocaleDateString()}{" "}
+                            •{" "}
+                            {new Date(thought.created_at).toLocaleTimeString(
+                                [],
+                                {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                }
+                            )}
+                        </span>
+                    </div>
+                    <div className="flex gap-4 mt-4">
+                        <button
+                            onClick={() => handleInteraction("like")}
+                            disabled={isSubmitting}
+                            className={`glass px-3 w-[65px] py-1 flex items-center cursor-pointer rounded-lg text-sm transition-colors duration-200 disabled:opacity-50  ${
+                                isLiked
+                                    ? "bg-red-600 text-red-600"
+                                    : "hover:bg-brand-violet/30 text-white"
+                            }`}
+                        >
+                            <HandThumbUpIcon className="h-4 w-4 mr-2" />
+                            {thought.likes}
+                        </button>
+                        <button
+                            onClick={() => handleInteraction("dislike")}
+                            disabled={isSubmitting}
+                            className={`glass px-3 w-[65px] flex items-center py-1 cursor-pointer rounded-lg text-sm transition-colors duration-200 disabled:opacity-50 ${
+                                isDisliked
+                                    ? "bg-red-600 text-red-600"
+                                    : "hover:bg-red-600/30 text-white"
+                            }`}
+                        >
+                            <HandThumbDownIcon className="h-4 w-4 mr-2" />
+                            {thought.dislikes}
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -317,22 +348,40 @@ export default function ThoughtDetailPage() {
                                 key={c.id}
                                 className="border-b border-white/10 pb-2"
                             >
-                                <p className="text-sm text-white">
-                                    {c.content}
-                                </p>
-                                <span className="text-xs text-gray-500">
-                                    {c.username} •{" "}
-                                    {new Date(
-                                        c.created_at
-                                    ).toLocaleDateString()}{" "}
-                                    {new Date(c.created_at).toLocaleTimeString(
-                                        [],
-                                        {
-                                            hour: "2-digit",
-                                            minute: "2-digit",
-                                        }
+                                <div className="flex items-center gap-2">
+                                    {c.user.profile_picture ? (
+                                        <Image
+                                            width={28}
+                                            height={28}
+                                            src={c.user.profile_picture}
+                                            alt={c.user.username}
+                                            className="w-7 h-7 rounded-full object-cover"
+                                        />
+                                    ) : (
+                                        <div className="w-7 h-7 rounded-full bg-brand-violet flex items-center justify-center text-2xl font-bold text-white">
+                                            {c?.user.username
+                                                ?.charAt(0)
+                                                ?.toUpperCase()}
+                                        </div>
                                     )}
-                                </span>
+                                    <div>
+                                        <p className="text-sm text-white">
+                                            {c.content}
+                                        </p>
+                                        <span className="text-xs text-gray-500">
+                                            {c.user.username} •{" "}
+                                            {new Date(
+                                                c.created_at
+                                            ).toLocaleDateString()}{" "}
+                                            {new Date(
+                                                c.created_at
+                                            ).toLocaleTimeString([], {
+                                                hour: "2-digit",
+                                                minute: "2-digit",
+                                            })}
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                         ))}
                     </div>

@@ -5,16 +5,30 @@ import { Signout } from "@/util/helper";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-type Thought = {
+interface user {
+    id: string;
+    username: string;
+    profile_picture: string;
+}
+
+interface comment {
     id: string;
     content: string;
-    likes: number;
-    dislikes: number;
+    profile_picture: string;
+    user: user;
+}
+
+export interface Thought {
+    id: string;
+    content: string;
     user_id: string;
-    created_at: string;
+    created_at: string; // ISO timestamp
     username: string;
-    profile_picture?: string;
-};
+    profile_picture: string;
+    liked_by_users: user[];
+    disliked_by_users: user[];
+    comments: comment[];
+}
 
 export default function HomePage() {
     const [thoughts, setThoughts] = useState<Thought[]>([]);
@@ -63,35 +77,47 @@ export default function HomePage() {
 
     // Like / Dislike
     const handleReaction = async (id: string, type: "like" | "dislike") => {
-        const token = localStorage.getItem("authToken");
-        // try {
-        //     const res = await fetch(
-        //         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/thoughts/${id}/${type}`,
-        //         {
-        //             method: "POST",
-        //             headers: {
-        //                 Authorization: `Bearer ${token}`,
-        //                 "Content-Type": "application/json",
-        //             },
-        //         }
-        //     );
-        //     const data = await res.json();
-        //     if (data.success) {
-        //       setThoughts((prev) =>
-        //         prev.map((t) =>
-        //           t.id === id
-        //             ? {
-        //                 ...t,
-        //                 likes: type === "like" ? t.likes + 1 : t.likes,
-        //                 dislikes: type === "dislike" ? t.dislikes + 1 : t.dislikes,
-        //               }
-        //             : t
-        //         )
-        //       );
-        //     }
-        // } catch (err) {
-        //     console.error("Error reacting:", err);
-        // }
+        try {
+            const res = await fetch(
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/thought/${id}/${type}`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${localStorage.getItem(
+                            "authToken"
+                        )}`,
+                    },
+                    body: JSON.stringify({
+                        userId: localStorage.getItem("user_id"),
+                    }),
+                }
+            );
+            const data = await res.json();
+            if (data.success) {
+                console.log(data);
+
+                // setThoughts((prev) =>
+                //     prev.map((t) =>
+                //         t.id === id
+                //             ? {
+                //                   ...t,
+                //                   liked_by_users:
+                //                       type === "like"
+                //                           ? data.data
+                //                           : t.liked_by_users,
+                //                   disliked_by_users:
+                //                       type === "dislike"
+                //                           ? data.data
+                //                           : t.disliked_by_users,
+                //               }
+                //             : t
+                //     )
+                // );
+            }
+        } catch (err) {
+            console.error("Error reacting:", err);
+        }
     };
 
     // Post a new thought
