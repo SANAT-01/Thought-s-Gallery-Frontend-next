@@ -3,6 +3,13 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import {
+    BellAlertIcon,
+    InboxArrowDownIcon,
+    LockClosedIcon,
+    ShieldExclamationIcon,
+    UserCircleIcon,
+} from "@heroicons/react/24/solid";
 
 export default function SettingsPage() {
     const [user, setUser] = useState<{
@@ -39,7 +46,7 @@ export default function SettingsPage() {
                 const res = await fetch(
                     `${
                         process.env.NEXT_PUBLIC_API_BASE_URL
-                    }/api/user/${localStorage.getItem("user_id")}`,
+                    }/user/${localStorage.getItem("user_id")}`,
                     {
                         headers: { Authorization: `Bearer ${token}` },
                     }
@@ -84,14 +91,8 @@ export default function SettingsPage() {
             if (profileImage) {
                 formData.append("profile_picture", profileImage); // must match backend
             }
-
-            // 🚀 Debug: log FormData keys
-            // for (const [key, value] of formData.entries()) {
-            //     console.log(key, value);
-            // }
-
             const res = await fetch(
-                `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/${user.id}`,
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/user/${user.id}`,
                 {
                     method: "PUT",
                     headers: {
@@ -148,7 +149,7 @@ export default function SettingsPage() {
         setLoading(true);
         try {
             const res = await fetch(
-                `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/${user.id}`,
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/user/${user.id}`,
                 {
                     method: "DELETE",
                     headers: {
@@ -187,8 +188,9 @@ export default function SettingsPage() {
         <div className="max-w-2xl mx-auto mt-10 space-y-6">
             {/* Profile Settings */}
             <div className="p-6 rounded-xl bg-black/50 border border-white/10 shadow-md">
-                <h2 className="text-lg font-semibold text-white mb-2">
-                    👤 Profile Settings
+                <h2 className="flex items-center gap-2 text-lg font-semibold text-white mb-2">
+                    <UserCircleIcon className="h-7 w-7" />
+                    <span>Profile Settings</span>
                 </h2>
                 <p className="text-sm text-gray-400 mb-4">
                     Update your profile information and preferences.
@@ -250,18 +252,20 @@ export default function SettingsPage() {
                 />
 
                 <button
-                    className="w-full px-4 py-2 rounded-md bg-brand-violet hover:bg-brand-violet-dark text-white font-medium"
+                    className="w-full px-4 flex justify-center gap-2 items-center py-2 rounded-md bg-brand-violet hover:bg-brand-violet-dark text-white font-medium"
                     onClick={handleUpdate}
                     disabled={loading}
                 >
-                    💾 Save Profile
+                    <InboxArrowDownIcon className="h-5 w-5" />
+                    <span>Save Profile</span>
                 </button>
             </div>
 
             {/* Notification Settings */}
             <div className="p-6 rounded-xl bg-black/50 border border-white/10 shadow-md">
-                <h2 className="text-lg font-semibold text-white mb-2">
-                    🔔 Notification Settings
+                <h2 className="text-lg flex gap-2 items-center font-semibold text-white mb-2">
+                    <BellAlertIcon className="h-5 w-5" />
+                    <span> Notification Settings</span>
                 </h2>
                 <p className="text-sm text-gray-400 mb-4">
                     Manage how you receive notifications.
@@ -330,8 +334,9 @@ export default function SettingsPage() {
 
             {/* Privacy Settings */}
             <div className="p-6 rounded-xl bg-black/50 border border-white/10 shadow-md">
-                <h2 className="text-lg font-semibold text-white mb-2">
-                    🔒 Privacy Settings
+                <h2 className="flex gap-2 items-center text-lg font-semibold text-white mb-2">
+                    <LockClosedIcon className="h-5 w-5" />
+                    <span>Privacy Settings</span>
                 </h2>
                 <p className="text-sm text-gray-400 mb-4">
                     Control your privacy and visibility preferences.
@@ -394,8 +399,9 @@ export default function SettingsPage() {
 
             {/* Danger Zone */}
             <div className="p-6 rounded-xl bg-black/50 border border-red-500/30 shadow-md">
-                <h2 className="text-lg font-semibold text-red-500 mb-2">
-                    🛑 Danger Zone
+                <h2 className="flex gap-2 items-center text-lg font-semibold text-red-400 mb-2">
+                    <ShieldExclamationIcon className="h-5 w-5" />
+                    <span>Danger Zone</span>
                 </h2>
                 <p className="text-sm text-gray-400 mb-4">
                     Irreversible and destructive actions.
@@ -403,9 +409,9 @@ export default function SettingsPage() {
                 <button
                     onClick={handleDelete}
                     disabled={loading}
-                    className="w-full px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white font-medium transition disabled:opacity-50"
+                    className="w-full px-4 py-2 rounded-md bg-red-400 hover:bg-red-600 text-white font-medium transition disabled:opacity-50"
                 >
-                    {loading ? "Deleting..." : "🗑️ Delete Account"}
+                    {loading ? "Deleting..." : "Delete Account"}
                 </button>
             </div>
         </div>

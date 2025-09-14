@@ -4,202 +4,122 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { HandThumbDownIcon, HandThumbUpIcon } from "@heroicons/react/24/solid";
+import { useGetThoughtById } from "@/service/query/thought.query";
+import { useGetCommentByThoughtId } from "@/service/query/comment.query";
+import { usePostDislike, usePostLike } from "@/service/query/interaction.query";
+import { comment, ThoughtType } from "@/types/thoughtType";
 
-// Updated Thought interface to include the current user's action
-
-interface Thought {
-    id: string;
-    content: string;
-    user_id: string;
-    created_at: string;
-    likes: number;
-    dislikes: number;
-    username: string;
-    profile_picture?: string;
-    user_action: "liked" | "disliked" | null; // e.g., 'liked', 'disliked', or null
-}
-
-interface User {
-    id: string;
-    username: string;
-    profile_picture?: string;
-}
-
-interface Comment {
-    id: string;
-    user_id: string;
-    content: string;
-    created_at: string;
-    user: User;
-}
-
-export default function ThoughtDetailPage() {
-    const { id } = useParams(); // 🔹 /thought/[id]
-    const [thought, setThought] = useState<Thought>({
+const ThoughtDetailPage = () => {
+    const { id } = useParams() as { id: string }; // 🔹 /thought/[id]
+    const [thought, setThought] = useState<ThoughtType>({
         id: "",
         content: "",
         user_id: "",
         created_at: "",
-        likes: 0,
-        dislikes: 0,
+        liked_by: [],
+        disliked_by: [],
         user_action: null,
         username: "",
         profile_picture: "",
     });
-    const [isLiked, setIsLiked] = useState(false); // Track if the user has liked the thought
-    const [isDisliked, setIsDisliked] = useState(false); // Track if the user has disliked the thought
-    const [comments, setComments] = useState<Comment[]>([]);
+    const [comments, setComments] = useState<comment[]>([]);
     const [newComment, setNewComment] = useState("");
-    const [isSubmitting, setIsSubmitting] = useState(false); // For disabling buttons during API calls
-
     const router = useRouter();
+    const [interactionState, setInteractionState] = useState<{
+        liked: number;
+        disliked: number;
+        currentAction?: "liked" | "disliked" | null;
+    }>({ liked: 0, disliked: 0 });
 
-    // --- Fetch Initial Data ---
+    const { data: thoughtData, isLoading: thoughtLoading } = useGetThoughtById({
+        id: id?.toString() || "",
+        user_id: localStorage.getItem("user_id") || "",
+    });
+
+    const { data: commentsData, isLoading: commentsLoading } =
+        useGetCommentByThoughtId(id?.toString() || "");
+
+    const {
+        mutateAsync: postLike,
+        isPending: liking,
+        isSuccess: likeSuccess,
+    } = usePostLike();
+
+    const {
+        mutateAsync: postDislike,
+        isPending: disliking,
+        isSuccess: disSuccess,
+    } = usePostDislike();
+
     useEffect(() => {
-        if (!id) return;
+        if (thoughtData && thoughtData.success) {
+            setThought(thoughtData.data);
+            setInteractionState({
+                liked: thoughtData.data.liked_by.length,
+                disliked: thoughtData.data.disliked_by.length,
+                currentAction: thoughtData.data.user_action,
+            });
+        }
+    }, [thoughtData]);
 
-        const fetchThought = async () => {
-            const res = await fetch(
-                // Note: A more RESTful convention would be /api/thoughts/${id}
-                `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/thought/${id}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem(
-                            "authToken"
-                        )}`,
-                    },
-                }
-            );
-            const likes = await fetch(
-                `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/thought/${id}/likes`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem(
-                            "authToken"
-                        )}`,
-                    },
-                }
-            );
-            const dislikes = await fetch(
-                `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/thought/${id}/dislikes`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem(
-                            "authToken"
-                        )}`,
-                    },
-                }
-            );
-            const likesData = await likes.json();
-            const dislikesData = await dislikes.json();
-            setIsLiked(
-                likesData.data.some(
-                    (like: { user_id: string }) =>
-                        like.user_id === localStorage.getItem("user_id")
-                )
-            );
-            setIsDisliked(
-                dislikesData.data.some(
-                    (dislike: { user_id: string }) =>
-                        dislike.user_id === localStorage.getItem("user_id")
-                )
-            );
-            // console.log(likesData, dislikesData);
-            const data = await res.json();
-            if (data.success)
-                setThought({
-                    ...data.data,
-                    likes: likesData.data.length,
-                    dislikes: dislikesData.data.length,
-                });
-        };
-
-        const fetchComments = async () => {
-            const res = await fetch(
-                `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/thought/${id}/comments`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem(
-                            "authToken"
-                        )}`,
-                    },
-                }
-            );
-            const data = await res.json();
-            if (data.success) setComments(data.data);
-        };
-
-        fetchThought();
-        fetchComments();
-    }, [id]);
+    useEffect(() => {
+        if (commentsData && commentsData.success)
+            setComments(commentsData.data);
+    }, [commentsData]);
 
     // --- Handle Like/Dislike Interaction ---
     const handleInteraction = async (type: "like" | "dislike") => {
-        if (isSubmitting || !id) return;
-        setIsSubmitting(true);
+        if (liking || !id) return;
+
         try {
-            const res = await fetch(
-                `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/thought/${id}/${type}`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${localStorage.getItem(
-                            "authToken"
-                        )}`,
-                    },
-                    body: JSON.stringify({
-                        userId: localStorage.getItem("user_id"),
-                    }),
-                }
-            );
-
-            const data = await res.json();
-
-            // If successful, the API should return the updated thought object
-            if (data.success) {
-                setThought((prev) => {
-                    return {
-                        ...prev,
-                        likes:
-                            type === "like"
-                                ? isLiked
-                                    ? prev.likes - 1
-                                    : prev.likes + 1
-                                : isLiked
-                                ? prev.likes - 1
-                                : prev.likes,
-                        dislikes:
-                            type === "dislike"
-                                ? isDisliked
-                                    ? prev.dislikes - 1
-                                    : prev.dislikes + 1
-                                : isDisliked
-                                ? prev.dislikes - 1
-                                : prev.dislikes,
-                        user_action: type === "like" ? "liked" : "disliked",
-                    };
+            if (type === "like") {
+                await postLike({
+                    thoughtId: id,
+                    payload: { userId: localStorage.getItem("user_id") || "" },
                 });
-                setIsLiked((prev) => (type === "like" ? !prev : false));
-                setIsDisliked((prev) => (type === "dislike" ? !prev : false));
+            } else {
+                await postDislike({
+                    thoughtId: id,
+                    payload: { userId: localStorage.getItem("user_id") || "" },
+                });
             }
+            setInteractionState((prev) => {
+                let { liked, disliked, currentAction } = prev;
+
+                if (type === "like") {
+                    if (currentAction === "liked") {
+                        liked -= 1;
+                        currentAction = null;
+                    } else {
+                        liked += 1;
+                        if (currentAction === "disliked") disliked -= 1;
+                        currentAction = "liked";
+                    }
+                } else {
+                    if (currentAction === "disliked") {
+                        disliked -= 1;
+                        currentAction = null;
+                    } else {
+                        disliked += 1;
+                        if (currentAction === "liked") liked -= 1;
+                        currentAction = "disliked";
+                    }
+                }
+
+                return { liked, disliked, currentAction };
+            });
         } catch (error) {
             console.error(`Failed to post ${type}:`, error);
-            // Optionally, show an error message to the user
-        } finally {
-            setIsSubmitting(false);
         }
     };
 
     // --- Handle Comment Submission ---
     const handleCommentSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!newComment.trim() || isSubmitting) return;
-        setIsSubmitting(true);
 
         try {
             const res = await fetch(
-                `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/thought/${id}/comments`,
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/thought/${id}/comments`,
                 {
                     method: "POST",
                     headers: {
@@ -222,8 +142,6 @@ export default function ThoughtDetailPage() {
             }
         } catch (error) {
             console.error("Failed to post comment:", error);
-        } finally {
-            setIsSubmitting(false);
         }
     };
 
@@ -284,34 +202,34 @@ export default function ThoughtDetailPage() {
                     <div className="flex gap-4 mt-4">
                         <button
                             onClick={() => handleInteraction("like")}
-                            disabled={isSubmitting}
+                            disabled={liking}
                             className={`glass px-3 w-[65px] py-1 flex items-center cursor-pointer rounded-lg text-sm transition-colors duration-200 disabled:opacity-50  ${
-                                isLiked
+                                interactionState.currentAction === "liked"
                                     ? "bg-red-600 text-red-600"
                                     : "hover:bg-brand-violet/30 text-white"
                             }`}
                         >
                             <HandThumbUpIcon className="h-4 w-4 mr-2" />
-                            {thought.likes}
+                            {interactionState.liked}
                         </button>
                         <button
                             onClick={() => handleInteraction("dislike")}
-                            disabled={isSubmitting}
+                            disabled={disliking}
                             className={`glass px-3 w-[65px] flex items-center py-1 cursor-pointer rounded-lg text-sm transition-colors duration-200 disabled:opacity-50 ${
-                                isDisliked
+                                interactionState.currentAction === "disliked"
                                     ? "bg-red-600 text-red-600"
                                     : "hover:bg-red-600/30 text-white"
                             }`}
                         >
                             <HandThumbDownIcon className="h-4 w-4 mr-2" />
-                            {thought.dislikes}
+                            {interactionState.disliked}
                         </button>
                     </div>
                 </div>
             </div>
 
             {/* Comments Section */}
-            <div className="glass p-6 rounded-2xl shadow-lg">
+            <div className="glass p-6 h-[500px] rounded-2xl shadow-lg">
                 <h2 className="text-lg font-semibold text-brand-violet mb-4">
                     Comments
                 </h2>
@@ -326,12 +244,12 @@ export default function ThoughtDetailPage() {
                         onChange={(e) => setNewComment(e.target.value)}
                         placeholder="Write a comment..."
                         className="flex-1 px-4 py-2 rounded-lg bg-black/50 border border-white/10 focus:ring-2 focus:ring-brand-violet text-white text-sm"
-                        disabled={isSubmitting}
+                        disabled={liking}
                     />
                     <button
                         type="submit"
                         className="px-4 py-2 bg-brand-violet hover:bg-brand-violet-dark rounded-lg text-white text-sm disabled:opacity-50"
-                        disabled={isSubmitting || !newComment.trim()}
+                        disabled={liking || !newComment.trim()}
                     >
                         Post
                     </button>
@@ -371,10 +289,10 @@ export default function ThoughtDetailPage() {
                                         <span className="text-xs text-gray-500">
                                             {c.user.username} •{" "}
                                             {new Date(
-                                                c.created_at
+                                                c?.created_at ?? ""
                                             ).toLocaleDateString()}{" "}
                                             {new Date(
-                                                c.created_at
+                                                c?.created_at ?? ""
                                             ).toLocaleTimeString([], {
                                                 hour: "2-digit",
                                                 minute: "2-digit",
@@ -389,4 +307,6 @@ export default function ThoughtDetailPage() {
             </div>
         </div>
     );
-}
+};
+
+export default ThoughtDetailPage;

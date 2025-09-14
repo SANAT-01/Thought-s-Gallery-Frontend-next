@@ -1,0 +1,26 @@
+interface user {
+    id: string;
+    username: string;
+    profile_picture: string;
+}
+
+export interface comment {
+    id: string;
+    content: string;
+    profile_picture: string;
+    user: user;
+    created_at?: string;
+}
+
+export interface ThoughtType {
+    id: string;
+    content: string;
+    user_id: string;
+    created_at: string;
+    username: string;
+    profile_picture: string;
+    liked_by: user[];
+    disliked_by: user[];
+    comments?: comment[];
+    user_action?: "liked" | "disliked" | null; // e.g., 'liked', 'disliked', or null
+}

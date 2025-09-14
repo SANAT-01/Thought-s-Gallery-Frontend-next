@@ -3,6 +3,15 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import {
+    CalendarDateRangeIcon,
+    ChartBarSquareIcon,
+    Cog8ToothIcon,
+    HandThumbDownIcon,
+    HandThumbUpIcon,
+    PencilIcon,
+    PencilSquareIcon,
+} from "@heroicons/react/24/solid";
 
 export default function ProfilePage() {
     const [user, setUser] = useState<{
@@ -41,7 +50,7 @@ export default function ProfilePage() {
         // fetch user thoughts (replace with your API)
         if (id) {
             fetch(
-                `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/thoughts?user_id=${id}`,
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/thoughts?user_id=${id}`,
                 {
                     headers: { Authorization: `Bearer ${token}` },
                 }
@@ -53,12 +62,9 @@ export default function ProfilePage() {
                     }
                 })
                 .catch((err) => console.error("Error fetching thoughts:", err));
-            fetch(
-                `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/${id}/likes`,
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                }
-            )
+            fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user/${id}/likes`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
                 .then((res) => res.json())
                 .then((data) => {
                     if (data.success) {
@@ -67,7 +73,7 @@ export default function ProfilePage() {
                 })
                 .catch((err) => console.error("Error fetching likes:", err));
             fetch(
-                `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/${id}/dislikes`,
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/user/${id}/dislikes`,
                 {
                     headers: { Authorization: `Bearer ${token}` },
                 }
@@ -118,33 +124,45 @@ export default function ProfilePage() {
                         {user.username}
                     </h2>
                     <p className="text-gray-400">{user.email}</p>
-                    <p className="mt-2 text-sm text-gray-500">
-                        📅 Joined{" "}
-                        {user.created_at
-                            ? new Date(user.created_at).toDateString()
-                            : "Unknown"}
+                    <p className="mt-2 flex justify-center text-sm text-gray-500 items-center">
+                        <CalendarDateRangeIcon className="h-4 w-4 mr-1" />
+                        {user.created_at ? (
+                            <span>
+                                {`Joined ${new Date(
+                                    user.created_at
+                                ).toLocaleDateString("en-US", {
+                                    month: "long",
+                                    year: "numeric",
+                                })}`}
+                            </span>
+                        ) : (
+                            <span>{`Unknown`}</span>
+                        )}
                     </p>
 
                     <div className="flex justify-center gap-3 mt-4">
                         <button
-                            className="px-4 py-2 rounded-md bg-gray-800 hover:bg-gray-700 text-white text-sm"
+                            className="flex gap-2 w-[115px] justify-center px-4 py-2 rounded-md bg-gray-800 hover:bg-gray-700 text-white text-sm"
                             onClick={() => router.push("/settings")}
                         >
-                            ✏️ Edit Profile
+                            <PencilIcon className="h-5 w-5" />
+                            <span>Edit</span>
                         </button>
                         <button
                             onClick={() => router.push("/settings")}
-                            className="px-4 py-2 rounded-md bg-gray-800 hover:bg-gray-700 text-white text-sm"
+                            className="flex gap-2 w-[115px] justify-center px-4 py-2 rounded-md bg-gray-800 hover:bg-gray-700 text-white text-sm"
                         >
-                            ⚙️ Settings
+                            <Cog8ToothIcon className="h-5 w-5" />
+                            <span>Settings</span>
                         </button>
                     </div>
                 </div>
 
                 {/* Activity Stats */}
                 <div className="p-6 rounded-xl bg-black/50 border border-white/10 shadow-md">
-                    <h3 className="text-md font-semibold text-white mb-4">
-                        📊 Activity Stats
+                    <h3 className="text-md items-center font-semibold text-white mb-4">
+                        <ChartBarSquareIcon className="h-5 w-5 inline-block mr-1" />
+                        <span>Activity Stats</span>
                     </h3>
                     <div className="space-y-3 text-gray-300">
                         <div className="flex justify-between">
@@ -154,13 +172,19 @@ export default function ProfilePage() {
                             </span>
                         </div>
                         <div className="flex justify-between">
-                            <span>👍 Likes Received</span>
+                            <div className="inline-flex items-center gap-2">
+                                <HandThumbUpIcon className="h-4 w-4" />
+                                <span>Likes Received</span>
+                            </div>
                             <span className="text-brand-violet">
                                 {likesData.length}
                             </span>
                         </div>
                         <div className="flex justify-between">
-                            <span>👎 Dislikes Received</span>
+                            <div className="inline-flex items-center gap-2">
+                                <HandThumbDownIcon className="h-4 w-4" />
+                                <span>Dislikes Received</span>
+                            </div>
                             <span className="text-gray-400">
                                 {dislikesData.length}
                             </span>
@@ -171,8 +195,9 @@ export default function ProfilePage() {
 
             {/* Right Column */}
             <div className="md:col-span-2">
-                <h2 className="text-xl font-bold text-white mb-4">
-                    📝 My Thoughts
+                <h2 className="text-xl flex items-center gap-2 font-bold text-white mb-4">
+                    <PencilSquareIcon className="h-5 w-5" />
+                    <span> My Thoughts</span>
                 </h2>
 
                 {thoughts.length === 0 ? (

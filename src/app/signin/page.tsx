@@ -3,6 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useDispatch } from "react-redux";
+import { login } from "@/store/slices/authSlice";
+import { showToast } from "@/store/slices/toastSlice";
 
 export default function SigninPage() {
     const [email, setEmail] = useState("");
@@ -11,6 +14,8 @@ export default function SigninPage() {
     const [message, setMessage] = useState("");
 
     const router = useRouter();
+
+    const dispatch = useDispatch();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -39,11 +44,24 @@ export default function SigninPage() {
                         data.data.user.profile_picture
                     );
                 }
-
-                setMessage("✅ Signed in successfully!");
+                dispatch(
+                    login({ token: data.data.authToken, user: data.data.user })
+                );
+                dispatch(
+                    showToast({
+                        type: "success",
+                        message: "Signed in successfully!",
+                    })
+                );
                 router.push("/"); // redirect to home
             } else {
                 setMessage("❌ " + (data.message || "Signin failed"));
+                dispatch(
+                    showToast({
+                        type: "error",
+                        message: "Signin failed. Please try again.",
+                    })
+                );
             }
         } catch (err) {
             setMessage("⚠️ Server error");
