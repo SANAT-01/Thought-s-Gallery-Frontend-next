@@ -91,12 +91,6 @@ export default function SettingsPage() {
             if (profileImage) {
                 formData.append("profile_picture", profileImage); // must match backend
             }
-
-            // 🚀 Debug: log FormData keys
-            // for (const [key, value] of formData.entries()) {
-            //     console.log(key, value);
-            // }
-
             const res = await fetch(
                 `${process.env.NEXT_PUBLIC_API_BASE_URL}/user/${user.id}`,
                 {

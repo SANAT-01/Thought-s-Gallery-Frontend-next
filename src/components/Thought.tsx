@@ -1,3 +1,4 @@
+import { ThoughtType } from "@/types/thoughtType";
 import {
     ChatBubbleBottomCenterIcon,
     HandThumbDownIcon,
@@ -7,34 +8,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React from "react";
 
-interface user {
-    id: string;
-    username: string;
-    profile_picture: string;
-}
-
-interface comment {
-    id: string;
-    content: string;
-    profile_picture: string;
-    user: user;
-}
-
-interface ThoughtProps {
-    thought: {
-        id: string;
-        content: string;
-        user_id: string;
-        created_at: string; // ISO timestamp
-        username: string;
-        profile_picture: string;
-        liked_by_users: user[];
-        disliked_by_users: user[];
-        comments: comment[];
-    };
-}
-
-const Thought: React.FC<ThoughtProps> = ({ thought }) => {
+const Thought = ({ thought }: { thought: ThoughtType }) => {
     // const [isLiked, setIsLiked] = useState(false); // Track if the user has liked the thought
     // const [isDisliked, setIsDisliked] = useState(false); // Track if the user has disliked the thought
     // const [isSubmitting, setIsSubmitting] = useState(false); // For disabling buttons during API calls
@@ -145,7 +119,7 @@ const Thought: React.FC<ThoughtProps> = ({ thought }) => {
                 <button
                     // onClick={() => handleReaction(thought.id, "like")}
                     className={`glass px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium ${
-                        thought?.liked_by_users?.find(
+                        thought?.liked_by?.find(
                             (user) =>
                                 user.id === localStorage.getItem("user_id")
                         )
@@ -154,12 +128,12 @@ const Thought: React.FC<ThoughtProps> = ({ thought }) => {
                     } hover:bg-brand-violet/30 transition`}
                 >
                     <HandThumbUpIcon className="h-4 w-4" />
-                    <span>{thought?.liked_by_users?.length}</span>
+                    <span>{thought?.liked_by?.length}</span>
                 </button>
                 <button
                     // onClick={() => handleReaction(thought.id, "dislike")}
                     className={`glass px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium ${
-                        thought?.disliked_by_users?.find(
+                        thought?.disliked_by?.find(
                             (user) =>
                                 user.id === localStorage.getItem("user_id")
                         )
@@ -168,7 +142,7 @@ const Thought: React.FC<ThoughtProps> = ({ thought }) => {
                     } hover:bg-brand-violet/30 transition`}
                 >
                     <HandThumbDownIcon className="h-4 w-4" />
-                    <span>{thought?.disliked_by_users?.length}</span>
+                    <span>{thought?.disliked_by?.length}</span>
                 </button>
                 <button
                     // onClick={() => handleReaction(thought.id, "dislike")}

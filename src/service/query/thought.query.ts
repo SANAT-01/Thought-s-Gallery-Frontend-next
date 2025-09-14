@@ -1,7 +1,10 @@
 import { queryKey } from "@/constants/apiRoutes";
-import { getThought, postThought } from "@/service/api/thoughts.service";
+import {
+    getThought,
+    getThoughtById,
+    postThought,
+} from "@/service/api/thoughts.service";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import qs from "qs";
 
 export const useGetThoughts = ({
     limit,
@@ -16,6 +19,20 @@ export const useGetThoughts = ({
         queryFn: () => getThought({ limit, offset }),
         staleTime: 1000 * 60 * 5, // 5 minutes
         // cacheTime: 1000 * 60 * 10, // 10 minutes
+    });
+};
+
+export const useGetThoughtById = ({
+    id,
+    user_id,
+}: {
+    id: string;
+    user_id: string;
+}) => {
+    return useQuery({
+        queryKey: [queryKey.thought, id],
+        queryFn: () => getThoughtById({ id, user_id }),
+        staleTime: 1000 * 60 * 5, // 5 minutes
     });
 };
 

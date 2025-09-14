@@ -4,11 +4,12 @@ interface user {
     profile_picture: string;
 }
 
-interface comment {
+export interface comment {
     id: string;
     content: string;
     profile_picture: string;
     user: user;
+    created_at?: string;
 }
 
 export interface ThoughtType {
@@ -18,7 +19,8 @@ export interface ThoughtType {
     created_at: string;
     username: string;
     profile_picture: string;
-    liked_by_users: user[];
-    disliked_by_users: user[];
-    comments: comment[];
+    liked_by: user[];
+    disliked_by: user[];
+    comments?: comment[];
+    user_action?: "liked" | "disliked" | null; // e.g., 'liked', 'disliked', or null
 }

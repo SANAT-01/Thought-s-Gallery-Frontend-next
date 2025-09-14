@@ -103,8 +103,8 @@ export default function HomePage() {
                 setThoughts([
                     {
                         ...data.data,
-                        liked_by_users: [],
-                        disliked_by_users: [],
+                        liked_by: [],
+                        disliked_by: [],
                         comments: [],
                     },
                     ...thoughts,
