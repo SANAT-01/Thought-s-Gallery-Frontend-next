@@ -3,20 +3,23 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import Toast from "./Toast";
-import { Signout } from "@/util/helper";
+import { Signout } from "@/lib/helper";
+import { useDispatch } from "react-redux";
+import { logout } from "@/store/slices/authSlice";
+// import { RootState } from "@/store/store";
 
-export default function Navbar() {
+const Navbar = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
     const router = useRouter();
     const pathname = usePathname();
+    const dispatch = useDispatch();
 
-    const [toast, setToast] = useState<{
-        type: "success" | "error" | "warning";
-        message: string;
-    }>({ type: "success", message: "Signed in successfully!" });
-    const [isToastActive, setIsToastActive] = useState(false);
+    // const auth = useSelector((state: RootState) => state.auth);
+    // const theme = useSelector((state: RootState) => state.theme);
+
+    // console.log("Auth State:", auth);
+    // console.log("Theme State:", theme);
 
     useEffect(() => {
         const token = localStorage.getItem("authToken");
@@ -31,6 +34,7 @@ export default function Navbar() {
     const handleLogout = () => {
         Signout();
         setIsLoggedIn(false);
+        dispatch(logout());
         router.push("/signin");
     };
 
@@ -49,8 +53,8 @@ export default function Navbar() {
 
                 {/* Right Side */}
                 <nav className="flex items-center gap-3">
-                    {isLoggedIn ? (
-                        <>
+                    {isLoggedIn && (
+                        <div className="flex items-center gap-3">
                             {/* Home Button */}
                             <Link
                                 href="/"
@@ -96,34 +100,12 @@ export default function Navbar() {
                                     </div>
                                 )}
                             </div>
-                        </>
-                    ) : (
-                        <>
-                            {/* <Link
-                href="/signup"
-                className="px-4 py-2 rounded-lg bg-[#171717] text-white border border-white/10 hover:bg-black transition"
-              >
-                Sign Up
-              </Link>
-              <Link
-                href="/signin"
-                className="px-4 py-2 rounded-lg bg-[#171717] text-white border border-white/10 hover:bg-black transition"
-              >
-                Sign In
-              </Link> */}
-                        </>
+                        </div>
                     )}
                 </nav>
             </div>
-            <div className="fixed top-10 right-2">
-                {isToastActive && (
-                    <Toast
-                        type={toast.type}
-                        message={toast.message}
-                        onClose={() => setIsToastActive(false)}
-                    />
-                )}
-            </div>
         </header>
     );
-}
+};
+
+export default Navbar;

@@ -1,7 +1,7 @@
 "use client";
 
 import Thought from "@/components/Thought";
-import { Signout } from "@/util/helper";
+import { Signout } from "@/lib/helper";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 

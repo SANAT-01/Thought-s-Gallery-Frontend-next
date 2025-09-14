@@ -42,7 +42,6 @@ const Thought: React.FC<ThoughtProps> = ({ thought, handleReaction }) => {
     // const [isSubmitting, setIsSubmitting] = useState(false); // For disabling buttons during API calls
 
     const router = useRouter();
-    console.log(thought);
     return (
         <div
             key={thought.id}
@@ -103,7 +102,7 @@ const Thought: React.FC<ThoughtProps> = ({ thought, handleReaction }) => {
                 <button
                     // onClick={() => handleReaction(thought.id, "like")}
                     className={`glass px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium ${
-                        thought.liked_by_users.find(
+                        thought?.liked_by_users?.find(
                             (user) =>
                                 user.id === localStorage.getItem("user_id")
                         )
@@ -112,12 +111,12 @@ const Thought: React.FC<ThoughtProps> = ({ thought, handleReaction }) => {
                     } hover:bg-brand-violet/30 transition`}
                 >
                     <HandThumbUpIcon className="h-4 w-4" />
-                    <span>{thought.liked_by_users.length}</span>
+                    <span>{thought?.liked_by_users?.length}</span>
                 </button>
                 <button
                     // onClick={() => handleReaction(thought.id, "dislike")}
                     className={`glass px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium ${
-                        thought.disliked_by_users.find(
+                        thought?.disliked_by_users?.find(
                             (user) =>
                                 user.id === localStorage.getItem("user_id")
                         )
@@ -126,7 +125,7 @@ const Thought: React.FC<ThoughtProps> = ({ thought, handleReaction }) => {
                     } hover:bg-brand-violet/30 transition`}
                 >
                     <HandThumbDownIcon className="h-4 w-4" />
-                    <span>{thought.disliked_by_users.length}</span>
+                    <span>{thought?.disliked_by_users?.length}</span>
                 </button>
                 <button
                     // onClick={() => handleReaction(thought.id, "dislike")}
@@ -135,7 +134,7 @@ const Thought: React.FC<ThoughtProps> = ({ thought, handleReaction }) => {
                     {
                         <ChatBubbleBottomCenterIcon className="text-gray-400 w-4 h-4" />
                     }
-                    <span>{thought.comments.length}</span>
+                    <span>{thought?.comments?.length}</span>
                 </button>
             </div>
         </div>

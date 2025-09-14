@@ -116,7 +116,7 @@ export default function ThoughtDetailPage() {
 
         const fetchComments = async () => {
             const res = await fetch(
-                `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/thought/${id}/comments`,
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/thought/${id}/comments?limit=4&offset=4`,
                 {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem(
