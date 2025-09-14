@@ -3,6 +3,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { Providers } from "@/components/provider";
 import Controls from "@/components/Controls";
+import QueryProvider from "@/middleware/queryProvider";
 
 export const metadata: Metadata = {
     title: "Thought's Gallery",
@@ -17,20 +18,22 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body className="bg-background text-foreground min-h-screen flex flex-col">
-                {/* Redux Provider */}
-                <Providers>
-                    {/* Global Controls like Toasts, Modals */}
-                    <Controls />
-                    {/* ✅ Navbar always fixed at top */}
-                    <header className="fixed inset-x-0 top-0 z-50">
-                        <Navbar />
-                    </header>
+                <QueryProvider>
+                    {/* Redux Provider */}
+                    <Providers>
+                        {/* Global Controls like Toasts, Modals */}
+                        <Controls />
+                        {/* ✅ Navbar always fixed at top */}
+                        <header className="fixed inset-x-0 top-0 z-50">
+                            <Navbar />
+                        </header>
 
-                    {/* ✅ main content below navbar, scrollable if needed */}
-                    <main className="flex-1 pt-16 overflow-y-hidden">
-                        {children}
-                    </main>
-                </Providers>
+                        {/* ✅ main content below navbar, scrollable if needed */}
+                        <main className="flex-1 pt-16 overflow-y-hidden">
+                            {children}
+                        </main>
+                    </Providers>
+                </QueryProvider>
             </body>
         </html>
     );

@@ -61,7 +61,7 @@ export default function ThoughtDetailPage() {
         const fetchThought = async () => {
             const res = await fetch(
                 // Note: A more RESTful convention would be /api/thoughts/${id}
-                `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/thought/${id}`,
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/thought/${id}`,
                 {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem(
@@ -71,7 +71,7 @@ export default function ThoughtDetailPage() {
                 }
             );
             const likes = await fetch(
-                `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/thought/${id}/likes`,
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/thought/${id}/likes`,
                 {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem(
@@ -81,7 +81,7 @@ export default function ThoughtDetailPage() {
                 }
             );
             const dislikes = await fetch(
-                `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/thought/${id}/dislikes`,
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/thought/${id}/dislikes`,
                 {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem(
@@ -116,7 +116,7 @@ export default function ThoughtDetailPage() {
 
         const fetchComments = async () => {
             const res = await fetch(
-                `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/thought/${id}/comments?limit=4&offset=4`,
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/thought/${id}/comments?limit=4&offset=4`,
                 {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem(
@@ -139,7 +139,7 @@ export default function ThoughtDetailPage() {
         setIsSubmitting(true);
         try {
             const res = await fetch(
-                `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/thought/${id}/${type}`,
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/thought/${id}/${type}`,
                 {
                     method: "POST",
                     headers: {
@@ -199,7 +199,7 @@ export default function ThoughtDetailPage() {
 
         try {
             const res = await fetch(
-                `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/thought/${id}/comments`,
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/thought/${id}/comments`,
                 {
                     method: "POST",
                     headers: {

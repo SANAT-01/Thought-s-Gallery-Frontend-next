@@ -1,7 +1,7 @@
 "use client";
 
 import Thought from "@/components/Thought";
-import { Signout } from "@/lib/helper";
+import { useThoughts } from "@/hooks/useThoughts";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -32,10 +32,11 @@ export interface Thought {
 
 export default function HomePage() {
     const [thoughts, setThoughts] = useState<Thought[]>([]);
-    const [loading, setLoading] = useState(true);
     const [newThought, setNewThought] = useState("");
     const [posting, setPosting] = useState(false);
     const router = useRouter();
+
+    const { data, isLoading, error } = useThoughts();
 
     useEffect(() => {
         const token = localStorage.getItem("authToken");
@@ -47,39 +48,14 @@ export default function HomePage() {
 
     // Fetch all thoughts
     useEffect(() => {
-        const fetchThoughts = async () => {
-            const token = localStorage.getItem("authToken");
-            try {
-                const res = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/thoughts`,
-                    {
-                        headers: { Authorization: `Bearer ${token}` },
-                    }
-                );
-                const data = await res.json();
-                if (data.success) {
-                    setThoughts(data.data);
-                } else {
-                    console.log("first");
-                    Signout();
-                    router.push("/signin");
-                }
-            } catch (err) {
-                console.error("Failed to load thoughts", err);
-                Signout();
-                router.push("/signin");
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchThoughts();
-    }, []);
+        if (!isLoading && data) setThoughts(data.data);
+    }, [data, isLoading]);
 
     // Like / Dislike
     const handleReaction = async (id: string, type: "like" | "dislike") => {
         try {
             const res = await fetch(
-                `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/thought/${id}/${type}`,
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/thought/${id}/${type}`,
                 {
                     method: "POST",
                     headers: {
@@ -131,7 +107,7 @@ export default function HomePage() {
 
         try {
             const res = await fetch(
-                `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/thought`,
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/thought`,
                 {
                     method: "POST",
                     headers: {
@@ -157,7 +133,7 @@ export default function HomePage() {
         }
     };
 
-    if (loading) {
+    if (isLoading) {
         return (
             <main className="flex min-h-screen items-center justify-center text-gray-400">
                 Loading thoughts...
@@ -168,7 +144,7 @@ export default function HomePage() {
     return (
         <main className="min-h-screen bg-background text-foreground p-6">
             <h1 className="text-3xl font-bold text-center text-brand-violet mb-8">
-                🌌 Thought’s Gallery 💭
+                Thought’s Gallery
             </h1>
 
             {/* Post Thought Form */}
@@ -177,7 +153,7 @@ export default function HomePage() {
                 className="glass max-w-xl mx-auto mb-8 p-4 rounded-xl shadow-lg border border-brand-violet/30"
             >
                 <textarea
-                    placeholder="✨ Share your thought..."
+                    placeholder="Share your thought..."
                     value={newThought}
                     onChange={(e) => setNewThought(e.target.value)}
                     className="w-full bg-transparent border border-white/10 rounded-lg p-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-violet"

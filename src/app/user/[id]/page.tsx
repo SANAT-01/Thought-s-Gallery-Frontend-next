@@ -33,7 +33,7 @@ export default function ProfilePage() {
         const fetchUser = async () => {
             try {
                 const res = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/${id}`,
+                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/user/${id}`,
                     {
                         headers: {
                             Authorization: `Bearer ${localStorage.getItem(
@@ -52,7 +52,7 @@ export default function ProfilePage() {
         const fetchThoughts = async () => {
             try {
                 const res = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/thoughts?user_id=${id}`,
+                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/thoughts?user_id=${id}`,
                     {
                         headers: {
                             Authorization: `Bearer ${localStorage.getItem(
