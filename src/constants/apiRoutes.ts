@@ -1,5 +1,6 @@
 export const apiRoutes = {
-    thought: "/thoughts",
+    getThought: "/thoughts",
+    postThought: "/thought",
     // profile: "/",
 };
 

@@ -1,6 +1,10 @@
 import { config } from "@/config/config";
 import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
-import { axiosRequestInterceptors } from "./interceptors";
+import {
+    axiosRequestInterceptors,
+    errorInterceptor,
+    successInterceptor,
+} from "./interceptors";
 
 const axiosRequestConfig: AxiosRequestConfig = {
     baseURL: config.API_URL,
@@ -15,11 +19,6 @@ const axiosRequestConfig: AxiosRequestConfig = {
 const axiosInstance: AxiosInstance = axios.create(axiosRequestConfig);
 
 axiosInstance.interceptors.request.use(axiosRequestInterceptors);
-axiosInstance.interceptors.response.use(
-    (res) => res,
-    (err) => {
-        return Promise.reject(err);
-    }
-);
+axiosInstance.interceptors.response.use(successInterceptor, errorInterceptor);
 
 export { axiosInstance as axios };

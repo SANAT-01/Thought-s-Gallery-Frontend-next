@@ -32,16 +32,59 @@ interface ThoughtProps {
         disliked_by_users: user[];
         comments: comment[];
     };
-
-    handleReaction: (id: string, type: "like" | "dislike") => void;
 }
 
-const Thought: React.FC<ThoughtProps> = ({ thought, handleReaction }) => {
+const Thought: React.FC<ThoughtProps> = ({ thought }) => {
     // const [isLiked, setIsLiked] = useState(false); // Track if the user has liked the thought
     // const [isDisliked, setIsDisliked] = useState(false); // Track if the user has disliked the thought
     // const [isSubmitting, setIsSubmitting] = useState(false); // For disabling buttons during API calls
 
     const router = useRouter();
+
+    const handleReaction = async (id: string, type: "like" | "dislike") => {
+        try {
+            const res = await fetch(
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/thought/${id}/${type}`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${localStorage.getItem(
+                            "authToken"
+                        )}`,
+                    },
+                    body: JSON.stringify({
+                        userId: localStorage.getItem("user_id"),
+                    }),
+                }
+            );
+            const data = await res.json();
+            if (data.success) {
+                console.log(data);
+
+                // setThoughts((prev) =>
+                //     prev.map((t) =>
+                //         t.id === id
+                //             ? {
+                //                   ...t,
+                //                   liked_by_users:
+                //                       type === "like"
+                //                           ? data.data
+                //                           : t.liked_by_users,
+                //                   disliked_by_users:
+                //                       type === "dislike"
+                //                           ? data.data
+                //                           : t.disliked_by_users,
+                //               }
+                //             : t
+                //     )
+                // );
+            }
+        } catch (err) {
+            console.error("Error reacting:", err);
+        }
+    };
+
     return (
         <div
             key={thought.id}

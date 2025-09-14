@@ -1,139 +1,127 @@
 "use client";
 
 import Thought from "@/components/Thought";
-import { useThoughts } from "@/hooks/useThoughts";
+import { useGetThoughts, usePostThoughts } from "@/service/query/thought.query";
+import { showToast } from "@/store/slices/toastSlice";
+import { ThoughtType } from "@/types/thoughtType";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
 
-interface user {
-    id: string;
-    username: string;
-    profile_picture: string;
-}
-
-interface comment {
-    id: string;
-    content: string;
-    profile_picture: string;
-    user: user;
-}
-
-export interface Thought {
-    id: string;
-    content: string;
-    user_id: string;
-    created_at: string; // ISO timestamp
-    username: string;
-    profile_picture: string;
-    liked_by_users: user[];
-    disliked_by_users: user[];
-    comments: comment[];
-}
+const ITEMS_PER_PAGE = 5;
 
 export default function HomePage() {
-    const [thoughts, setThoughts] = useState<Thought[]>([]);
+    const [thoughts, setThoughts] = useState<ThoughtType[]>([]);
     const [newThought, setNewThought] = useState("");
-    const [posting, setPosting] = useState(false);
+    const [newPageLoading, setNewPageLoading] = useState(false);
+    const [isLastPage, setIsLastPage] = useState(false);
+    const [offset, setOffset] = useState(0);
     const router = useRouter();
+    const dispatch = useDispatch();
 
-    const { data, isLoading, error } = useThoughts();
+    const observerRef = useRef<HTMLDivElement | null>(null);
 
+    const {
+        data: thoughtsData,
+        isLoading: thoughtsLoading,
+        isFetching, // Tracks ongoing fetches
+    } = useGetThoughts({ limit: ITEMS_PER_PAGE, offset: offset }); // ✅ Use limit and offset states
+
+    const {
+        mutateAsync: postThought,
+        isPending: posting,
+        isSuccess,
+    } = usePostThoughts();
+
+    // Handle initial fetch and subsequent fetches
+    useEffect(() => {
+        // Only append data if a new page is loaded and not during the initial empty state
+        if (!thoughtsLoading && thoughtsData?.data) {
+            if (thoughtsData.data.length < ITEMS_PER_PAGE) {
+                setIsLastPage(true); // No more pages to load
+            }
+            setThoughts((prevThoughts) => [
+                ...prevThoughts,
+                ...thoughtsData.data,
+            ]);
+        }
+    }, [thoughtsData, thoughtsLoading]);
+
+    // Handle Intersecting for Infinite Scroll
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                // If the sentinel div is intersecting and we are not already fetching
+                if (entries[0].isIntersecting && !isFetching && !isLastPage) {
+                    setNewPageLoading(true);
+                    setTimeout(() => {
+                        setOffset((prevOffset) => prevOffset + ITEMS_PER_PAGE);
+                        setNewPageLoading(false);
+                    }, 2000); // 2000 ms = 2 seconds
+                }
+            },
+            { threshold: 1 }
+        );
+
+        const currentRef = observerRef.current;
+        if (currentRef) observer.observe(currentRef);
+
+        return () => {
+            if (currentRef) observer.unobserve(currentRef);
+        };
+    }, [isFetching]); // ✅ Dependency array must include isFetching to prevent multiple simultaneous fetches
+
+    // Handle initial authentication check
     useEffect(() => {
         const token = localStorage.getItem("authToken");
         if (!token) {
-            router.push("/signin"); // redirect if not logged in
-            return;
+            router.push("/signin");
         }
     }, [router]);
 
-    // Fetch all thoughts
+    // Handle post success feedback
     useEffect(() => {
-        if (!isLoading && data) setThoughts(data.data);
-    }, [data, isLoading]);
-
-    // Like / Dislike
-    const handleReaction = async (id: string, type: "like" | "dislike") => {
-        try {
-            const res = await fetch(
-                `${process.env.NEXT_PUBLIC_API_BASE_URL}/thought/${id}/${type}`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${localStorage.getItem(
-                            "authToken"
-                        )}`,
-                    },
-                    body: JSON.stringify({
-                        userId: localStorage.getItem("user_id"),
-                    }),
-                }
+        if (isSuccess) {
+            dispatch(
+                showToast({
+                    type: "success",
+                    message: "Successfully posted thought",
+                })
             );
-            const data = await res.json();
-            if (data.success) {
-                console.log(data);
-
-                // setThoughts((prev) =>
-                //     prev.map((t) =>
-                //         t.id === id
-                //             ? {
-                //                   ...t,
-                //                   liked_by_users:
-                //                       type === "like"
-                //                           ? data.data
-                //                           : t.liked_by_users,
-                //                   disliked_by_users:
-                //                       type === "dislike"
-                //                           ? data.data
-                //                           : t.disliked_by_users,
-                //               }
-                //             : t
-                //     )
-                // );
-            }
-        } catch (err) {
-            console.error("Error reacting:", err);
         }
-    };
+    }, [isSuccess, dispatch]);
 
-    // Post a new thought
     const handlePost = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!newThought.trim()) return;
-
-        setPosting(true);
-        const token = localStorage.getItem("authToken");
         const user_id = localStorage.getItem("user_id"); // ✅ get user id
-
         try {
-            const res = await fetch(
-                `${process.env.NEXT_PUBLIC_API_BASE_URL}/thought`,
-                {
-                    method: "POST",
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        user_id, // ✅ required by API
-                        content: newThought,
-                    }),
-                }
-            );
-
-            const data = await res.json();
+            const data = await postThought({
+                payload: { content: newThought, user_id: user_id! },
+            });
             if (data.success) {
-                setThoughts([data.data, ...thoughts]); // prepend
+                setThoughts([
+                    {
+                        ...data.data,
+                        liked_by_users: [],
+                        disliked_by_users: [],
+                        comments: [],
+                    },
+                    ...thoughts,
+                ]); // prepend
                 setNewThought("");
             }
         } catch (err) {
-            console.error("Error posting thought:", err);
-        } finally {
-            setPosting(false);
+            dispatch(
+                showToast({
+                    type: "error",
+                    message: "Failed to post thought",
+                })
+            );
         }
     };
 
-    if (isLoading) {
+    if (thoughtsLoading && offset === 0) {
         return (
             <main className="flex min-h-screen items-center justify-center text-gray-400">
                 Loading thoughts...
@@ -170,15 +158,20 @@ export default function HomePage() {
 
             {/* Thoughts Feed */}
             <div className="max-w-2xl mx-auto space-y-6">
-                {thoughts.map((thought) => (
-                    <div key={thought.id}>
-                        <Thought
-                            thought={thought}
-                            handleReaction={handleReaction}
-                        />
+                {thoughts.map((thought, index) => (
+                    <div key={index}>
+                        <Thought thought={thought} />
                     </div>
                 ))}
             </div>
+            {/* Loading more indicator */}
+            {isFetching || newPageLoading ? (
+                <div className="text-center text-gray-400 mt-4">
+                    Loading more thoughts...
+                </div>
+            ) : (
+                <div ref={observerRef} className="h-24"></div>
+            )}
         </main>
     );
 }
