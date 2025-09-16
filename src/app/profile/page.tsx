@@ -12,6 +12,7 @@ import {
     PencilIcon,
     PencilSquareIcon,
 } from "@heroicons/react/24/solid";
+import LoaderSpinner from "@/components/SpinnerComponent";
 
 export default function ProfilePage() {
     const [user, setUser] = useState<{
@@ -90,8 +91,8 @@ export default function ProfilePage() {
 
     if (!user) {
         return (
-            <div className="text-center py-20 text-white">
-                Loading profile...
+            <div className="flex items-center justify-center h-screen">
+                <LoaderSpinner />
             </div>
         );
     }

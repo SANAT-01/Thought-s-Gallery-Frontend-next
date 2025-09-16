@@ -8,6 +8,7 @@ import { useGetThoughtById } from "@/service/query/thought.query";
 import { useGetCommentByThoughtId } from "@/service/query/comment.query";
 import { usePostDislike, usePostLike } from "@/service/query/interaction.query";
 import { comment, ThoughtType } from "@/types/thoughtType";
+import LoaderSpinner from "@/components/SpinnerComponent";
 
 const ThoughtDetailPage = () => {
     const { id } = useParams() as { id: string }; // 🔹 /thought/[id]
@@ -145,8 +146,12 @@ const ThoughtDetailPage = () => {
         }
     };
 
-    if (!thought)
-        return <div className="text-center py-20 text-white">Loading...</div>;
+    if (thoughtLoading || commentsLoading)
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <LoaderSpinner />
+            </div>
+        );
 
     return (
         <div className="max-w-2xl mx-auto py-10 px-4">

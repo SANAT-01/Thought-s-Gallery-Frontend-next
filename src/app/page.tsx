@@ -1,5 +1,6 @@
 "use client";
 
+import LoaderSpinner from "@/components/SpinnerComponent";
 import Thought from "@/components/Thought";
 import { useGetThoughts, usePostThoughts } from "@/service/query/thought.query";
 import { showToast } from "@/store/slices/toastSlice";
@@ -123,9 +124,9 @@ export default function HomePage() {
 
     if (thoughtsLoading && offset === 0) {
         return (
-            <main className="flex min-h-screen items-center justify-center text-gray-400">
-                Loading thoughts...
-            </main>
+            <div className="flex items-center justify-center h-screen">
+                <LoaderSpinner />
+            </div>
         );
     }
 
@@ -166,8 +167,8 @@ export default function HomePage() {
             </div>
             {/* Loading more indicator */}
             {isFetching || newPageLoading ? (
-                <div className="text-center text-gray-400 mt-4">
-                    Loading more thoughts...
+                <div className="flex items-center justify-center mt-4">
+                    <LoaderSpinner />
                 </div>
             ) : (
                 <div ref={observerRef} className="h-24"></div>

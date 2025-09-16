@@ -26,11 +26,11 @@ export const errorInterceptor = async (
     error: AxiosError
 ): Promise<AxiosError | null> => {
     if (error.response?.status === 401) {
-        try {
-            return null;
-        } catch (_error) {
-            return null;
-        }
+        console.log(error);
+        console.log(window.location.pathname);
+        if (!window.location.pathname.includes("/signin"))
+            window.location.href = `${window.location.origin}/signin?redirectTo=${window.location.pathname}`;
+        return null;
     } else {
         if (error.response) {
             const errorMessage: ConsoleError = {
